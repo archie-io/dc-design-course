@@ -1,17 +1,13 @@
-# Домашнее задание №3
+## Underlay. OSPF
 
-## Underlay. IS-IS
+### Цель:
 
-### Задача:
-- Настроить IS-IS для Underlay сети
+- Настроить протокол OSPF для Underlay сети
 
 ## Выполнение:
 
 ### Схема сети
-
-![](images/1-05.drawio.png)
-
-### Конфигурация оборудования
+![](images/1-04.drawio.png)
 
 ### Конфигурация оборудования
 
@@ -21,28 +17,28 @@
 - #### [SPINE-1](config/SPINE-1.cfg)
 - #### [SPINE-2](config/SPINE-2.cfg)
 
-### Проверка связанности устройств по протоколу IS-IS
+---
+### Проверка связанности устройств по протоколу OSPF
 - #### SPINE-1
 ```
-SPINE-1#show isis neighbors
-
-Instance  VRF      System Id        Type Interface          SNPA              State Hold time   Circuit Id
-Underlay  default  LEAF-1           L1   Ethernet1          P2P               UP    28          0D
-Underlay  default  LEAF-2           L1   Ethernet2          P2P               UP    23          44
-Underlay  default  LEAF-3           L1   Ethernet3          P2P               UP    21          45
+SPINE-1#show ip ospf neighbor
+Neighbor ID     Instance VRF      Pri State                  Dead Time   Address         Interface
+10.0.2.1        1        default  0   FULL                   00:00:30    10.1.2.11       Ethernet2
+10.0.1.1        1        default  0   FULL                   00:00:30    10.1.1.11       Ethernet1
+10.0.3.1        1        default  0   FULL                   00:00:30    10.1.3.11       Ethernet3
 ```
 ```
 SPINE-1#show bfd peer
 VRF name: default
 -----------------
-DstAddr                MyDisc         YourDisc       Interface/Transport         Type               LastUp             LastDown            LastDiag    State
---------------- ---------------- ---------------- ------------------------- ------------ -------------------- -------------------- ------------------- -----
-10.1.1.11          3417848864       2738119935             Ethernet1(14)       normal       03/23/25 14:00                   NA       No Diagnostic       Up
-10.1.2.11          3472493921        202792178             Ethernet2(17)       normal       03/23/25 14:04                   NA       No Diagnostic       Up
-10.1.3.11           111945115       4099247985             Ethernet3(20)       normal       03/23/25 14:05       03/23/25 14:05       No Diagnostic       Up
+DstAddr                MyDisc         YourDisc       Interface/Transport         Type               LastUp       LastDown            LastDiag    State
+--------------- ---------------- ---------------- ------------------------- ------------ -------------------- -------------- ------------------- -----
+10.1.1.11          2368760763        407255479             Ethernet1(14)       normal       03/23/25 13:26             NA       No Diagnostic       Up
+10.1.2.11          2569793392       3242541117             Ethernet2(17)       normal       03/23/25 13:30             NA       No Diagnostic       Up
+10.1.3.11          2561701876       2558636959             Ethernet3(20)       normal       03/23/25 13:31             NA       No Diagnostic       Up
 ```
 ```
-SPINE-1#show ip route isis
+SPINE-1#show ip route ospf
 
 VRF: default
 Source Codes:
@@ -59,32 +55,30 @@ Source Codes:
        G  - gRIBI, RC - Route Cache Route,
        CL - CBF Leaked Route
 
- I L1     10.0.0.2/32 [115/30]
+ O        10.0.0.2/32 [110/30]
            via 10.1.1.11, Ethernet1
            via 10.1.2.11, Ethernet2
            via 10.1.3.11, Ethernet3
- I L1     10.0.1.1/32 [115/20]
+ O        10.0.1.1/32 [110/20]
            via 10.1.1.11, Ethernet1
- I L1     10.0.2.1/32 [115/20]
+ O        10.0.2.1/32 [110/20]
            via 10.1.2.11, Ethernet2
- I L1     10.0.3.1/32 [115/20]
+ O        10.0.3.1/32 [110/20]
            via 10.1.3.11, Ethernet3
- I L1     10.2.1.10/31 [115/20]
+ O        10.2.1.10/31 [110/20]
            via 10.1.1.11, Ethernet1
- I L1     10.2.2.10/31 [115/20]
+ O        10.2.2.10/31 [110/20]
            via 10.1.2.11, Ethernet2
- I L1     10.2.3.10/31 [115/20]
+ O        10.2.3.10/31 [110/20]
            via 10.1.3.11, Ethernet3
 ```
-
 - #### SPINE-2
 ```
-SPINE-2#show isis neighbors
-
-Instance  VRF      System Id        Type Interface          SNPA              State Hold time   Circuit Id
-Underlay  default  LEAF-1           L1   Ethernet1          P2P               UP    24          10
-Underlay  default  LEAF-2           L1   Ethernet2          P2P               UP    30          46
-Underlay  default  LEAF-3           L1   Ethernet3          P2P               UP    30          47
+SPINE-2#show ip ospf neighbor
+Neighbor ID     Instance VRF      Pri State                  Dead Time   Address         Interface
+10.0.2.1        1        default  0   FULL                   00:00:35    10.2.2.11       Ethernet2
+10.0.1.1        1        default  0   FULL                   00:00:37    10.2.1.11       Ethernet1
+10.0.3.1        1        default  0   FULL                   00:00:33    10.2.3.11       Ethernet3
 ```
 ```
 SPINE-2#show bfd peer
@@ -92,12 +86,12 @@ VRF name: default
 -----------------
 DstAddr                MyDisc         YourDisc       Interface/Transport         Type               LastUp       LastDown            LastDiag    State
 --------------- ---------------- ---------------- ------------------------- ------------ -------------------- -------------- ------------------- -----
-10.2.1.11          1936432898       4128034487             Ethernet1(12)       normal       03/23/25 14:05             NA       No Diagnostic       Up
-10.2.2.11          1213327137       2082415684             Ethernet2(15)       normal       03/23/25 14:05             NA       No Diagnostic       Up
-10.2.3.11           280094057       4070691464             Ethernet3(18)       normal       03/23/25 14:05             NA       No Diagnostic       Up
+10.2.1.11          1083605850       3065152577             Ethernet1(12)       normal       03/23/25 13:44             NA       No Diagnostic       Up
+10.2.2.11          3228150443       3451060874             Ethernet2(15)       normal       03/23/25 13:32             NA       No Diagnostic       Up
+10.2.3.11          1185616027        971815270             Ethernet3(18)       normal       03/23/25 13:32             NA       No Diagnostic       Up
 ```
 ```
-SPINE-2#show ip route isis
+SPINE-2#show ip route ospf
 
 VRF: default
 Source Codes:
@@ -114,20 +108,20 @@ Source Codes:
        G  - gRIBI, RC - Route Cache Route,
        CL - CBF Leaked Route
 
- I L1     10.0.0.1/32 [115/30]
+ O        10.0.0.1/32 [110/30]
            via 10.2.1.11, Ethernet1
            via 10.2.2.11, Ethernet2
            via 10.2.3.11, Ethernet3
- I L1     10.0.1.1/32 [115/20]
+ O        10.0.1.1/32 [110/20]
            via 10.2.1.11, Ethernet1
- I L1     10.0.2.1/32 [115/20]
+ O        10.0.2.1/32 [110/20]
            via 10.2.2.11, Ethernet2
- I L1     10.0.3.1/32 [115/20]
+ O        10.0.3.1/32 [110/20]
            via 10.2.3.11, Ethernet3
- I L1     10.1.1.10/31 [115/20]
+ O        10.1.1.10/31 [110/20]
            via 10.2.1.11, Ethernet1
- I L1     10.1.2.10/31 [115/20]
+ O        10.1.2.10/31 [110/20]
            via 10.2.2.11, Ethernet2
- I L1     10.1.3.10/31 [115/20]
+ O        10.1.3.10/31 [110/20]
            via 10.2.3.11, Ethernet3
 ```
