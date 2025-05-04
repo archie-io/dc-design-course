@@ -437,26 +437,592 @@ H - hw-offloaded; + - ecmp
 
 - #### LEAF-1
 ```
+LEAF-1# show ip route vrf VRF_COMMON
+VRF: VRF_COMMON
+Source Codes:
+       C - connected, S - static, K - kernel,
+       O - OSPF, IA - OSPF inter area, E1 - OSPF external type 1,
+       E2 - OSPF external type 2, N1 - OSPF NSSA external type 1,
+       N2 - OSPF NSSA external type2, B - Other BGP Routes,
+       B I - iBGP, B E - eBGP, R - RIP, I L1 - IS-IS level 1,
+       I L2 - IS-IS level 2, O3 - OSPFv3, A B - BGP Aggregate,
+       A O - OSPF Summary, NG - Nexthop Group Static Route,
+       V - VXLAN Control Service, M - Martian,
+       DH - DHCP client installed default route,
+       DP - Dynamic Policy Route, L - VRF Leaked,
+       G  - gRIBI, RC - Route Cache Route,
+       CL - CBF Leaked Route
+
+Gateway of last resort is not set
+
+ C        192.168.11.0/24
+           directly connected, Vlan11
+ B E      192.168.12.12/32 [20/0]
+           via VTEP 10.0.3.10 VNI 1000 router-mac 02:00:4f:4e:36:5c local-interface Vxlan1
+ B E      192.168.12.0/24 [20/0]
+           via VTEP 10.0.3.10 VNI 1000 router-mac 02:00:4f:4e:36:5c local-interface Vxlan1
+
+LEAF-1# show bgp evpn route-type ip-prefix ipv4
+BGP routing table information for VRF default
+Router identifier 10.0.1.1, local AS number 65001
+Route status codes: * - valid, > - active, S - Stale, E - ECMP head, e - ECMP
+                    c - Contributing to ECMP, % - Pending best path selection
+Origin codes: i - IGP, e - EGP, ? - incomplete
+AS Path Attributes: Or-ID - Originator ID, C-LST - Cluster List, LL Nexthop - Link Local Nexthop
+
+          Network                Next Hop              Metric  LocPref Weight  Path
+ * >      RD: 10.0.1.1:1000 ip-prefix 192.168.11.0/24
+                                 -                     -       -       0       i
+ * >Ec    RD: 10.0.3.1:1000 ip-prefix 192.168.12.0/24
+                                 10.0.3.10             -       100     0       65000 65003 i
+ *  ec    RD: 10.0.3.1:1000 ip-prefix 192.168.12.0/24
+                                 10.0.3.10             -       100     0       65000 65003 i
+ * >Ec    RD: 10.0.3.2:1000 ip-prefix 192.168.12.0/24
+                                 10.0.3.10             -       100     0       65000 65003 i
+ *  ec    RD: 10.0.3.2:1000 ip-prefix 192.168.12.0/24
+                                 10.0.3.10             -       100     0       65000 65003 i
+
+LEAF-1# show bgp evpn route-type mac-ip
+BGP routing table information for VRF default
+Router identifier 10.0.1.1, local AS number 65001
+Route status codes: * - valid, > - active, S - Stale, E - ECMP head, e - ECMP
+                    c - Contributing to ECMP, % - Pending best path selection
+Origin codes: i - IGP, e - EGP, ? - incomplete
+AS Path Attributes: Or-ID - Originator ID, C-LST - Cluster List, LL Nexthop - Link Local Nexthop
+
+          Network                Next Hop              Metric  LocPref Weight  Path
+ * >      RD: 10.0.1.1:10011 mac-ip 0050.7966.6800
+                                 -                     -       -       0       i
+ * >      RD: 10.0.1.1:10011 mac-ip 0050.7966.6800 192.168.11.11
+                                 -                     -       -       0       i
+ * >Ec    RD: 10.0.3.1:10012 mac-ip 0cd5.560f.0000
+                                 10.0.3.10             -       100     0       65000 65003 i
+ *  ec    RD: 10.0.3.1:10012 mac-ip 0cd5.560f.0000
+                                 10.0.3.10             -       100     0       65000 65003 i
+ * >Ec    RD: 10.0.3.2:10012 mac-ip 0cd5.560f.0000
+                                 10.0.3.10             -       100     0       65000 65003 i
+ *  ec    RD: 10.0.3.2:10012 mac-ip 0cd5.560f.0000
+                                 10.0.3.10             -       100     0       65000 65003 i
+ * >Ec    RD: 10.0.3.1:10012 mac-ip 0cd5.560f.0000 192.168.12.12
+                                 10.0.3.10             -       100     0       65000 65003 i
+ *  ec    RD: 10.0.3.1:10012 mac-ip 0cd5.560f.0000 192.168.12.12
+                                 10.0.3.10             -       100     0       65000 65003 i
+ * >Ec    RD: 10.0.3.2:10012 mac-ip 0cd5.560f.0000 192.168.12.12
+                                 10.0.3.10             -       100     0       65000 65003 i
+ *  ec    RD: 10.0.3.2:10012 mac-ip 0cd5.560f.0000 192.168.12.12
+                                 10.0.3.10             -       100     0       65000 65003 i
+
+LEAF-1# show arp vrf VRF_COMMON
+Address         Age (sec)  Hardware Addr   Interface
+192.168.11.11     0:00:08  0050.7966.6800  Vlan11, Ethernet11
+
+LEAF-1# show interfaces vxlan 1
+Vxlan1 is up, line protocol is up (connected)
+  Hardware is Vxlan
+  Source interface is Loopback1 and is active with 10.0.1.1
+  Listening on UDP port 4789
+  Replication/Flood Mode is headend with Flood List Source: EVPN
+  Remote MAC learning via EVPN
+  VNI mapping to VLANs
+  Static VLAN to VNI mapping is
+    [11, 10011]
+  Dynamic VLAN to VNI mapping for 'evpn' is
+    [1006, 1000]
+  Note: All Dynamic VLANs used by VCS are internal VLANs.
+        Use 'show vxlan vni' for details.
+  Static VRF to VNI mapping is
+   [VRF_COMMON, 1000]
+  Shared Router MAC is 0000.0000.0000
+
+LEAF-1# show vxlan vni
+VNI to VLAN Mapping for Vxlan1
+VNI         VLAN       Source       Interface        802.1Q Tag
+----------- ---------- ------------ ---------------- ----------
+10011       11         static       Ethernet11       untagged
+                                    Vxlan1           11
+
+VNI to dynamic VLAN Mapping for Vxlan1
+VNI        VLAN       VRF              Source
+---------- ---------- ---------------- ------------
+1000       1006       VRF_COMMON       evpn
+
 ```
 
 - #### LEAF-3-1
 ```
+LEAF-3-1# show ip route vrf VRF_COMMON
+VRF: VRF_COMMON
+Source Codes:
+       C - connected, S - static, K - kernel,
+       O - OSPF, IA - OSPF inter area, E1 - OSPF external type 1,
+       E2 - OSPF external type 2, N1 - OSPF NSSA external type 1,
+       N2 - OSPF NSSA external type2, B - Other BGP Routes,
+       B I - iBGP, B E - eBGP, R - RIP, I L1 - IS-IS level 1,
+       I L2 - IS-IS level 2, O3 - OSPFv3, A B - BGP Aggregate,
+       A O - OSPF Summary, NG - Nexthop Group Static Route,
+       V - VXLAN Control Service, M - Martian,
+       DH - DHCP client installed default route,
+       DP - Dynamic Policy Route, L - VRF Leaked,
+       G  - gRIBI, RC - Route Cache Route,
+       CL - CBF Leaked Route
+
+Gateway of last resort is not set
+
+ B E      192.168.11.11/32 [20/0]
+           via VTEP 10.0.1.1 VNI 1000 router-mac 12:81:aa:df:d9:a7 local-interface Vxlan1
+ B E      192.168.11.0/24 [20/0]
+           via VTEP 10.0.1.1 VNI 1000 router-mac 12:81:aa:df:d9:a7 local-interface Vxlan1
+ C        192.168.12.0/24
+           directly connected, Vlan12
+
+LEAF-3-1# show bgp evpn route-type ip-prefix ipv4
+BGP routing table information for VRF default
+Router identifier 10.0.3.1, local AS number 65003
+Route status codes: * - valid, > - active, S - Stale, E - ECMP head, e - ECMP
+                    c - Contributing to ECMP, % - Pending best path selection
+Origin codes: i - IGP, e - EGP, ? - incomplete
+AS Path Attributes: Or-ID - Originator ID, C-LST - Cluster List, LL Nexthop - Link Local Nexthop
+
+          Network                Next Hop              Metric  LocPref Weight  Path
+ * >Ec    RD: 10.0.1.1:1000 ip-prefix 192.168.11.0/24
+                                 10.0.1.1              -       100     0       65000 65001 i
+ *  ec    RD: 10.0.1.1:1000 ip-prefix 192.168.11.0/24
+                                 10.0.1.1              -       100     0       65000 65001 i
+ *        RD: 10.0.1.1:1000 ip-prefix 192.168.11.0/24
+                                 10.0.1.1              -       100     0       65000 65001 i
+ * >      RD: 10.0.3.1:1000 ip-prefix 192.168.12.0/24
+                                 -                     -       -       0       i
+          RD: 10.0.3.2:1000 ip-prefix 192.168.12.0/24
+                                 10.0.3.10             -       100     0       i
+          RD: 10.0.3.2:1000 ip-prefix 192.168.12.0/24
+                                 10.0.3.10             -       100     0       65000 65003 i
+          RD: 10.0.3.2:1000 ip-prefix 192.168.12.0/24
+                                 10.0.3.10             -       100     0       65000 65003 i
+
+LEAF-3-1# show bgp evpn route-type mac-ip
+BGP routing table information for VRF default
+Router identifier 10.0.3.1, local AS number 65003
+Route status codes: * - valid, > - active, S - Stale, E - ECMP head, e - ECMP
+                    c - Contributing to ECMP, % - Pending best path selection
+Origin codes: i - IGP, e - EGP, ? - incomplete
+AS Path Attributes: Or-ID - Originator ID, C-LST - Cluster List, LL Nexthop - Link Local Nexthop
+
+          Network                Next Hop              Metric  LocPref Weight  Path
+ * >Ec    RD: 10.0.1.1:10011 mac-ip 0050.7966.6800
+                                 10.0.1.1              -       100     0       65000 65001 i
+ *  ec    RD: 10.0.1.1:10011 mac-ip 0050.7966.6800
+                                 10.0.1.1              -       100     0       65000 65001 i
+ *        RD: 10.0.1.1:10011 mac-ip 0050.7966.6800
+                                 10.0.1.1              -       100     0       65000 65001 i
+ * >Ec    RD: 10.0.1.1:10011 mac-ip 0050.7966.6800 192.168.11.11
+                                 10.0.1.1              -       100     0       65000 65001 i
+ *  ec    RD: 10.0.1.1:10011 mac-ip 0050.7966.6800 192.168.11.11
+                                 10.0.1.1              -       100     0       65000 65001 i
+ *        RD: 10.0.1.1:10011 mac-ip 0050.7966.6800 192.168.11.11
+                                 10.0.1.1              -       100     0       65000 65001 i
+ * >      RD: 10.0.3.1:10012 mac-ip 0cd5.560f.0000
+                                 -                     -       -       0       i
+          RD: 10.0.3.2:10012 mac-ip 0cd5.560f.0000
+                                 10.0.3.10             -       100     0       i
+          RD: 10.0.3.2:10012 mac-ip 0cd5.560f.0000
+                                 10.0.3.10             -       100     0       65000 65003 i
+          RD: 10.0.3.2:10012 mac-ip 0cd5.560f.0000
+                                 10.0.3.10             -       100     0       65000 65003 i
+ * >      RD: 10.0.3.1:10012 mac-ip 0cd5.560f.0000 192.168.12.12
+                                 -                     -       -       0       i
+          RD: 10.0.3.2:10012 mac-ip 0cd5.560f.0000 192.168.12.12
+                                 10.0.3.10             -       100     0       65000 65003 i
+          RD: 10.0.3.2:10012 mac-ip 0cd5.560f.0000 192.168.12.12
+                                 10.0.3.10             -       100     0       i
+          RD: 10.0.3.2:10012 mac-ip 0cd5.560f.0000 192.168.12.12
+                                 10.0.3.10             -       100     0       65000 65003 i
+
+LEAF-3-1# show arp vrf VRF_COMMON
+Address         Age (sec)  Hardware Addr   Interface
+192.168.12.12     0:00:15  0cd5.560f.0000  Vlan12, Port-Channel12
+LEAF-3-1#show interfaces vxlan 1
+Vxlan1 is up, line protocol is up (connected)
+  Hardware is Vxlan
+  Source interface is Loopback10 and is active with 10.0.3.10
+  Listening on UDP port 4789
+  Replication/Flood Mode is headend with Flood List Source: EVPN
+  Remote MAC learning via EVPN
+  VNI mapping to VLANs
+  Static VLAN to VNI mapping is
+    [12, 10012]
+  Dynamic VLAN to VNI mapping for 'evpn' is
+    [4093, 1000]
+  Note: All Dynamic VLANs used by VCS are internal VLANs.
+        Use 'show vxlan vni' for details.
+  Static VRF to VNI mapping is
+   [VRF_COMMON, 1000]
+  MLAG Shared Router MAC is 0200.4f4e.365c
+
+LEAF-3-1# show vxlan vni
+VNI to VLAN Mapping for Vxlan1
+VNI         VLAN       Source       Interface            802.1Q Tag
+----------- ---------- ------------ -------------------- ----------
+10012       12         static       Ethernet12           untagged
+                                    Port-Channel12       12
+                                    Vxlan1               12
+
+VNI to dynamic VLAN Mapping for Vxlan1
+VNI        VLAN       VRF              Source
+---------- ---------- ---------------- ------------
+1000       4093       VRF_COMMON       evpn
+
+LEAF-3-1# show mlag
+MLAG Configuration:
+domain-id                          :         MLAG_DOMAIN
+local-interface                    :            Vlan4094
+peer-address                       :        10.255.255.2
+peer-link                          :    Port-Channel4094
+hb-peer-address                    :      10.255.255.102
+hb-peer-vrf                        :              HBMLAG
+peer-config                        :          consistent
+
+MLAG Status:
+state                              :              Active
+negotiation status                 :           Connected
+peer-link status                   :                  Up
+local-int status                   :                  Up
+system-id                          :   02:00:4f:4e:36:5c
+dual-primary detection             :          Configured
+dual-primary interface errdisabled :               False
+
+MLAG Ports:
+Disabled                           :                   0
+Configured                         :                   0
+Inactive                           :                   0
+Active-partial                     :                   0
+Active-full                        :                   1
+
+LEAF-3-1# show mlag interfaces detail
+                                                            local/remote
+   mlag             state       local       remote        oper        config       last change    changes
+---------- ----------------- ----------- ------------ ----------- ------------- ----------------- -------
+     12       active-full        Po12         Po12       up/up       ena/ena       0:17:41 ago          4
+
+LEAF-3-1# show port-channel detailed
+Port Channel Port-Channel12 (Fallback State: Unconfigured):
+Minimum links: unconfigured
+Minimum speed: unconfigured
+Current weight/Max weight: 1/16
+  Active Ports:
+       Port                 Time Became Active       Protocol       Mode         Weight    State
+    -------------------- ------------------------ -------------- ------------ ------------ -------
+       Ethernet12           17:16:32                 LACP           Active         1       Rx,Tx
+       PeerEthernet12       17:16:32                 LACP           Active         0       Unknown
+
+Port Channel Port-Channel4094 (Fallback State: Unconfigured):
+Minimum links: unconfigured
+Minimum speed: unconfigured
+Current weight/Max weight: 2/16
+  Active Ports:
+       Port            Time Became Active       Protocol       Mode         Weight    State
+    --------------- ------------------------ -------------- ------------ ------------ -----
+       Ethernet3       17:16:27                 LACP           Active         1       Rx,Tx
+       Ethernet4       17:16:27                 LACP           Active         1       Rx,Tx
+
+LEAF-3-1# show lacp interface detailed
+State: A = Active, P = Passive; S=ShortTimeout, L=LongTimeout;
+       G = Aggregable, I = Individual; s+=InSync, s-=OutOfSync;
+       C = Collecting (aggregating incoming frames), X = state machine expired,
+       D = Distributing (aggregating outgoing frames),
+       d = default neighbor state
+                         |                |                        Partner                                                        Partner       Collector                                      Actor                                                      Last                    State Machines
+   Port         Status   |    Select      |  Sys-id                         Port#       State         OperKey       PortPri       Churn          MaxDelay       Port#       State         OperKey       AdminKey       PortPriority       Churn          RxTime        Rx            mux                          MuxReason                         TimeoutMultiplier
+---------- --------------|----------------|----------------------------- ----------- ------------- ------------- ------------- ------------- --------------- ----------- ------------- ------------- -------------- ------------------ ------------- -------------- ------------- ---------------------------- ------------------------------------ -----------------
+Port Channel Port-Channel12*:
+   Et12         Bundled  |    Selected    |  FFFF,0c-d5-56-0f-00-00             1       ASGs+CD        0x000f           255       noChurn               0       32780       ASGs+CD        0x000c         0x000c              32768       noChurn       17:34:13       Current       CollectingDistributing       muxActorCollectingDistributing                    3
+Port Channel Port-Channel4094:
+   Et3          Bundled  |    Selected    |  8000,6a-19-79-6c-9d-30             4       ALGs+CD        0x08ff         32768       noChurn               0           3       ALGs+CD        0x08ff         0x08ff              32768       noChurn       17:33:53       Current       CollectingDistributing       muxActorCollectingDistributing                    3
+   Et4          Bundled  |    Selected    |  8000,6a-19-79-6c-9d-30             3       ALGs+CD        0x08ff         32768       noChurn               0           4       ALGs+CD        0x08ff         0x08ff              32768       noChurn       17:33:53       Current       CollectingDistributing       muxActorCollectingDistributing                    3
+
+* - Only local interfaces for MLAGs are displayed. Connect to the peer to
+    see the state for peer interfaces.
+
 ```
 
 - #### LEAF-3-2
 ```
+LEAF-3-2# show ip route vrf VRF_COMMON
+VRF: VRF_COMMON
+Source Codes:
+       C - connected, S - static, K - kernel,
+       O - OSPF, IA - OSPF inter area, E1 - OSPF external type 1,
+       E2 - OSPF external type 2, N1 - OSPF NSSA external type 1,
+       N2 - OSPF NSSA external type2, B - Other BGP Routes,
+       B I - iBGP, B E - eBGP, R - RIP, I L1 - IS-IS level 1,
+       I L2 - IS-IS level 2, O3 - OSPFv3, A B - BGP Aggregate,
+       A O - OSPF Summary, NG - Nexthop Group Static Route,
+       V - VXLAN Control Service, M - Martian,
+       DH - DHCP client installed default route,
+       DP - Dynamic Policy Route, L - VRF Leaked,
+       G  - gRIBI, RC - Route Cache Route,
+       CL - CBF Leaked Route
+
+Gateway of last resort is not set
+
+ B E      192.168.11.11/32 [200/0]
+           via VTEP 10.0.1.1 VNI 1000 router-mac 12:81:aa:df:d9:a7 local-interface Vxlan1
+ B E      192.168.11.0/24 [200/0]
+           via VTEP 10.0.1.1 VNI 1000 router-mac 12:81:aa:df:d9:a7 local-interface Vxlan1
+ C        192.168.12.0/24
+           directly connected, Vlan12
+
+LEAF-3-2# show bgp evpn route-type ip-prefix ipv4
+BGP routing table information for VRF default
+Router identifier 10.0.3.2, local AS number 65003
+Route status codes: * - valid, > - active, S - Stale, E - ECMP head, e - ECMP
+                    c - Contributing to ECMP, % - Pending best path selection
+Origin codes: i - IGP, e - EGP, ? - incomplete
+AS Path Attributes: Or-ID - Originator ID, C-LST - Cluster List, LL Nexthop - Link Local Nexthop
+
+          Network                Next Hop              Metric  LocPref Weight  Path
+ * >Ec    RD: 10.0.1.1:1000 ip-prefix 192.168.11.0/24
+                                 10.0.1.1              -       100     0       65000 65001 i
+ *  ec    RD: 10.0.1.1:1000 ip-prefix 192.168.11.0/24
+                                 10.0.1.1              -       100     0       65000 65001 i
+ *        RD: 10.0.1.1:1000 ip-prefix 192.168.11.0/24
+                                 10.0.1.1              -       100     0       65000 65001 i
+          RD: 10.0.3.1:1000 ip-prefix 192.168.12.0/24
+                                 10.0.3.10             -       100     0       i
+          RD: 10.0.3.1:1000 ip-prefix 192.168.12.0/24
+                                 10.0.3.10             -       100     0       65000 65003 i
+          RD: 10.0.3.1:1000 ip-prefix 192.168.12.0/24
+                                 10.0.3.10             -       100     0       65000 65003 i
+ * >      RD: 10.0.3.2:1000 ip-prefix 192.168.12.0/24
+                                 -                     -       -       0       i
+LEAF-3-2# show bgp evpn route-type mac-ip
+BGP routing table information for VRF default
+Router identifier 10.0.3.2, local AS number 65003
+Route status codes: * - valid, > - active, S - Stale, E - ECMP head, e - ECMP
+                    c - Contributing to ECMP, % - Pending best path selection
+Origin codes: i - IGP, e - EGP, ? - incomplete
+AS Path Attributes: Or-ID - Originator ID, C-LST - Cluster List, LL Nexthop - Link Local Nexthop
+
+          Network                Next Hop              Metric  LocPref Weight  Path
+ * >Ec    RD: 10.0.1.1:10011 mac-ip 0050.7966.6800
+                                 10.0.1.1              -       100     0       65000 65001 i
+ *  ec    RD: 10.0.1.1:10011 mac-ip 0050.7966.6800
+                                 10.0.1.1              -       100     0       65000 65001 i
+ *        RD: 10.0.1.1:10011 mac-ip 0050.7966.6800
+                                 10.0.1.1              -       100     0       65000 65001 i
+ * >Ec    RD: 10.0.1.1:10011 mac-ip 0050.7966.6800 192.168.11.11
+                                 10.0.1.1              -       100     0       65000 65001 i
+ *  ec    RD: 10.0.1.1:10011 mac-ip 0050.7966.6800 192.168.11.11
+                                 10.0.1.1              -       100     0       65000 65001 i
+ *        RD: 10.0.1.1:10011 mac-ip 0050.7966.6800 192.168.11.11
+                                 10.0.1.1              -       100     0       65000 65001 i
+          RD: 10.0.3.1:10012 mac-ip 0cd5.560f.0000
+                                 10.0.3.10             -       100     0       i
+          RD: 10.0.3.1:10012 mac-ip 0cd5.560f.0000
+                                 10.0.3.10             -       100     0       65000 65003 i
+          RD: 10.0.3.1:10012 mac-ip 0cd5.560f.0000
+                                 10.0.3.10             -       100     0       65000 65003 i
+ * >      RD: 10.0.3.2:10012 mac-ip 0cd5.560f.0000
+                                 -                     -       -       0       i
+          RD: 10.0.3.1:10012 mac-ip 0cd5.560f.0000 192.168.12.12
+                                 10.0.3.10             -       100     0       65000 65003 i
+          RD: 10.0.3.1:10012 mac-ip 0cd5.560f.0000 192.168.12.12
+                                 10.0.3.10             -       100     0       i
+          RD: 10.0.3.1:10012 mac-ip 0cd5.560f.0000 192.168.12.12
+                                 10.0.3.10             -       100     0       65000 65003 i
+ * >      RD: 10.0.3.2:10012 mac-ip 0cd5.560f.0000 192.168.12.12
+                                 -                     -       -       0       i
+
+LEAF-3-2# show arp vrf VRF_COMMON
+Address         Age (sec)  Hardware Addr   Interface
+192.168.12.12     0:00:15  0cd5.560f.0000  Vlan12, Port-Channel12
+
+LEAF-3-2# show interfaces vxlan 1
+Vxlan1 is up, line protocol is up (connected)
+  Hardware is Vxlan
+  Source interface is Loopback10 and is active with 10.0.3.10
+  Listening on UDP port 4789
+  Replication/Flood Mode is headend with Flood List Source: EVPN
+  Remote MAC learning via EVPN
+  VNI mapping to VLANs
+  Static VLAN to VNI mapping is
+    [12, 10012]
+  Dynamic VLAN to VNI mapping for 'evpn' is
+    [4093, 1000]
+  Note: All Dynamic VLANs used by VCS are internal VLANs.
+        Use 'show vxlan vni' for details.
+  Static VRF to VNI mapping is
+   [VRF_COMMON, 1000]
+  MLAG Shared Router MAC is 0200.4f4e.365c
+
+LEAF-3-2# show vxlan vni
+VNI to VLAN Mapping for Vxlan1
+VNI         VLAN       Source       Interface            802.1Q Tag
+----------- ---------- ------------ -------------------- ----------
+10012       12         static       Ethernet12           untagged
+                                    Port-Channel12       12
+                                    Vxlan1               12
+
+VNI to dynamic VLAN Mapping for Vxlan1
+VNI        VLAN       VRF              Source
+---------- ---------- ---------------- ------------
+1000       4093       VRF_COMMON       evpn
+
+LEAF-3-2# show mlag
+MLAG Configuration:
+domain-id                          :         MLAG_DOMAIN
+local-interface                    :            Vlan4094
+peer-address                       :        10.255.255.1
+peer-link                          :    Port-Channel4094
+hb-peer-address                    :      10.255.255.101
+hb-peer-vrf                        :              HBMLAG
+peer-config                        :          consistent
+
+MLAG Status:
+state                              :              Active
+negotiation status                 :           Connected
+peer-link status                   :                  Up
+local-int status                   :                  Up
+system-id                          :   02:00:4f:4e:36:5c
+dual-primary detection             :          Configured
+dual-primary interface errdisabled :               False
+
+MLAG Ports:
+Disabled                           :                   0
+Configured                         :                   0
+Inactive                           :                   0
+Active-partial                     :                   0
+Active-full                        :                   1
+
+LEAF-3-2# show mlag interfaces detail
+                                                            local/remote
+   mlag             state       local       remote        oper        config       last change    changes
+---------- ----------------- ----------- ------------ ----------- ------------- ----------------- -------
+     12       active-full        Po12         Po12       up/up       ena/ena       0:17:41 ago          4
+
+LEAF-3-2# show port-channel detailed
+Port Channel Port-Channel12 (Fallback State: Unconfigured):
+Minimum links: unconfigured
+Minimum speed: unconfigured
+Current weight/Max weight: 1/16
+  Active Ports:
+       Port                 Time Became Active       Protocol       Mode         Weight    State
+    -------------------- ------------------------ -------------- ------------ ------------ -------
+       Ethernet12           17:16:32                 LACP           Active         1       Rx,Tx
+       PeerEthernet12       17:16:32                 LACP           Active         0       Unknown
+
+Port Channel Port-Channel4094 (Fallback State: Unconfigured):
+Minimum links: unconfigured
+Minimum speed: unconfigured
+Current weight/Max weight: 2/16
+  Active Ports:
+       Port            Time Became Active       Protocol       Mode         Weight    State
+    --------------- ------------------------ -------------- ------------ ------------ -----
+       Ethernet3       17:16:27                 LACP           Active         1       Rx,Tx
+       Ethernet4       17:16:27                 LACP           Active         1       Rx,Tx
+
+LEAF-3-2# show lacp interface detailed
+State: A = Active, P = Passive; S=ShortTimeout, L=LongTimeout;
+       G = Aggregable, I = Individual; s+=InSync, s-=OutOfSync;
+       C = Collecting (aggregating incoming frames), X = state machine expired,
+       D = Distributing (aggregating outgoing frames),
+       d = default neighbor state
+                         |                |                        Partner                                                        Partner       Collector                                      Actor                                                      Last                    State Machines
+   Port         Status   |    Select      |  Sys-id                         Port#       State         OperKey       PortPri       Churn          MaxDelay       Port#       State         OperKey       AdminKey       PortPriority       Churn          RxTime        Rx            mux                          MuxReason                         TimeoutMultiplier
+---------- --------------|----------------|----------------------------- ----------- ------------- ------------- ------------- ------------- --------------- ----------- ------------- ------------- -------------- ------------------ ------------- -------------- ------------- ---------------------------- ------------------------------------ -----------------
+Port Channel Port-Channel12*:
+   Et12         Bundled  |    Selected    |  FFFF,0c-d5-56-0f-00-00             2       ASGs+CD        0x000f           255       noChurn               0          12       ASGs+CD        0x000c         0x000c              32768       noChurn       17:34:13       Current       CollectingDistributing       muxActorCollectingDistributing                    3
+Port Channel Port-Channel4094:
+   Et3          Bundled  |    Selected    |  8000,fa-0a-4c-d3-c8-45             4       ALGs+CD        0x08ff         32768       noChurn               0           3       ALGs+CD        0x08ff         0x08ff              32768       noChurn       17:33:53       Current       CollectingDistributing       muxActorCollectingDistributing                    3
+   Et4          Bundled  |    Selected    |  8000,fa-0a-4c-d3-c8-45             3       ALGs+CD        0x08ff         32768       noChurn               0           4       ALGs+CD        0x08ff         0x08ff              32768       noChurn       17:33:53       Current       CollectingDistributing       muxActorCollectingDistributing                    3
+
+* - Only local interfaces for MLAGs are displayed. Connect to the peer to
+    see the state for peer interfaces.
+
 ```
 
 - #### NODE-12-12
 ```
+[admin@NODE-12-12] > /ip/arp/print
+Flags: D - DYNAMIC; C - COMPLETE
+Columns: ADDRESS, MAC-ADDRESS, INTERFACE, STATUS
+#    ADDRESS         MAC-ADDRESS        INTERFACE  STATUS
+0 DC 192.168.12.254  00:00:00:00:00:01  Vlan12     reachable
+
+[admin@NODE-12-12] /interface/bonding> monitor Port-Channel12
+                    mode: 802.3ad
+            active-ports: ether1
+                          ether2
+          inactive-ports:
+          lacp-system-id: 0C:D5:56:0F:00:00
+    lacp-system-priority: 65535
+  lacp-partner-system-id: 02:00:4F:4E:36:5C
+
+
+[admin@NODE-12-12] /interface/bonding> monitor-slaves
+bond: Port-Channel12
+Flags: A - active; P - partner
+ AP port=ether1 key=15 flags="ATGSCD--" partner-sys-id=02:00:4F:4E:36:5C
+     partner-sys-priority=32768 partner-key=12 partner-flags="ATGSCD--"
+
+ AP port=ether2 key=15 flags="ATGSCD--" partner-sys-id=02:00:4F:4E:36:5C
+     partner-sys-priority=32768 partner-key=12 partner-flags="ATGSCD--"
 ```
 
 ### Проверка связности клиентов
 
+#### Все интерфейсы в UP
+
 - #### NODE-11-11
 ```
-```
+NODE-1-1> ping 192.168.12.12 -c 3
 
+84 bytes from 192.168.12.12 icmp_seq=1 ttl=62 time=3.180 ms
+84 bytes from 192.168.12.12 icmp_seq=2 ttl=62 time=2.403 ms
+84 bytes from 192.168.12.12 icmp_seq=3 ttl=62 time=2.382 ms
+```
 - #### NODE-12-12
 ```
+[admin@NODE-12-12] > ping 192.168.11.11 count=3
+  SEQ HOST                                     SIZE TTL TIME       STATUS
+    0 192.168.11.11                              56  62 4ms245us
+    1 192.168.11.11                              56  62 2ms319us
+    2 192.168.11.11                              56  62 2ms672us
+    sent=3 received=3 packet-loss=0% min-rtt=2ms319us avg-rtt=3ms78us max-rtt=4ms245us
+```
+
+#### Оба UPLINK на LEAF-3-1 в DOWN
+- #### NODE-11-11 on LEAF-1
+```
+NODE-11-11> ping 192.168.12.12 -c 3
+
+84 bytes from 192.168.12.12 icmp_seq=1 ttl=62 time=3.057 ms
+84 bytes from 192.168.12.12 icmp_seq=2 ttl=62 time=1.927 ms
+84 bytes from 192.168.12.12 icmp_seq=3 ttl=62 time=2.262 ms
+```
+- #### NODE-12-12 on MLAG(LEAF-3-1, LEAF-3-2)
+```
+[admin@NODE-12-12] > ping 192.168.11.11 count=3
+  SEQ HOST                                     SIZE TTL TIME       STATUS
+    0 192.168.11.11                              56  62 2ms587us
+    1 192.168.11.11                              56  62 1ms865us
+    2 192.168.11.11                              56  62 2ms635us
+    sent=3 received=3 packet-loss=0% min-rtt=1ms865us avg-rtt=2ms362us
+```
+
+#### На LEAF-3-1 отключены порты в сторону обоих SPINE. На LEAF-3-2 отключен порт в сторону сервера NODE-12-12
+```
+NODE-11-11> ping 192.168.12.12 -c 3
+
+84 bytes from 192.168.12.12 icmp_seq=1 ttl=62 time=3.145 ms
+84 bytes from 192.168.12.12 icmp_seq=2 ttl=62 time=3.069 ms
+84 bytes from 192.168.12.12 icmp_seq=3 ttl=62 time=2.778 ms
+```
+- #### NODE-12-12 on MLAG(LEAF-3-1, LEAF-3-2)
+```
+[admin@NODE-12-12] > ping 192.168.11.11 count=3
+  SEQ HOST                                     SIZE TTL TIME       STATUS
+    0 192.168.11.11                              56  62 12ms408us
+    1 192.168.11.11                              56  62 2ms701us
+    2 192.168.11.11                              56  62 4ms456us
+    sent=3 received=3 packet-loss=0% min-rtt=2ms701us avg-rtt=6ms521us
 ```
