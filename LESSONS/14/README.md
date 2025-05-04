@@ -19,7 +19,7 @@
 |            | Ethernet2              | 10.1.2.10/31      | 65000       | 65002       | 10.1.2.11/31      | Ethernet1              | LEAF-2           |
 |            | Ethernet3              | 10.1.3.10/31      | 65000       | 65003       | 10.1.3.11/31      | Ethernet1              | LEAF-3-1         |
 |            | Ethernet4              | 10.1.3.20/31      | 65000       | 65003       | 10.1.3.21/31      | Ethernet1              | LEAF-3-2         |
-|            | lo1                    | 10.0.0.1/32       |             |             |                   |                        |                  |
+|            | Loopback1              | 10.0.0.1/32       |             |             |                   |                        |                  |
 |            |                        |                   |             |             |                   |                        |                  |
 | SPINE-2    | Ethernet1              | 10.2.1.10/31      | 65000       | 65001       | 10.2.1.11/31      | Ethernet2              | LEAF-1           |
 |            | Ethernet2              | 10.2.2.10/31      | 65000       | 65002       | 10.2.2.11/31      | Ethernet2              | LEAF-2           |
@@ -30,13 +30,15 @@
 | LEAF-1     | Ethernet1              | 10.1.1.11/31      | 65001       | 65000       | 10.1.1.10/31      | Ethernet1              | SPINE-1          |
 |            | Ethernet2              | 10.2.1.11/31      | 65001       | 65000       | 10.2.1.10/31      | Ethernet1              | SPINE-2          |
 |            | Loopback1              | 10.0.1.1/32       |             |             |                   |                        |                  |
-|            | Vlan11                 | 192.168.11.254/24 |             |             | 192.168.11.11/24  | Ethernet0              | NODE-11-11       |
+|            | Vxlan1                 | Loopback1         |             |             |                   |                        |                  |
+|            | Vlan11                 | **Virtual IP**    |             |             | 192.168.11.11/24  | Ethernet0              | NODE-11-11       |
 |            |                        |                   |             |             |                   |                        |                  |
 | LEAF-2     | Ethernet1              | 10.1.2.11/31      | 65002       | 65000       | 10.1.2.10/31      | Ethernet2              | SPINE-1          |
 |            | Ethernet2              | 10.2.2.11/31      | 65002       | 65000       | 10.2.2.10/31      | Ethernet2              | SPINE-2          |
 |            | Loopback1              | 10.0.2.1/32       |             |             |                   |                        |                  |
-|            | Vlan11                 | 192.168.11.254/24 |             |             | 192.168.11.12/24  | Ethernet0              | NODE-11-12       |
-|            | Vlan12                 | 192.168.12.254/24 |             |             | 192.168.12.11/24  | Ethernet0              | NODE-12-11       |
+|            | Vxlan1                 | Loopback1         |             |             |                   |                        |                  |
+|            | Vlan11                 | **Virtual IP**    |             |             | 192.168.11.12/24  | Ethernet0              | NODE-11-12       |
+|            | Vlan12                 | **Virtual IP**    |             |             | 192.168.12.11/24  | Ethernet0              | NODE-12-11       |
 |            |                        |                   |             |             |                   |                        |                  |
 | LEAF-3-1   | Ethernet1              | 10.1.3.11/31      | 65003       | 65000       | 10.1.3.10/31      | Ethernet3              | SPINE-1          |
 |            | Ethernet2              | 10.2.3.11/31      | 65003       | 65000       | 10.2.3.10/31      | Ethernet3              | SPINE-2          |
@@ -46,7 +48,8 @@
 |            | Ethernet5              | 10.255.255.101/30 | HeartBeat   | HeartBeat   | 10.255.255.102/30 | Ethernet5              | LEAF-3-2         |
 |            | Loopback1              | 10.0.3.1/32       |             |             |                   |                        |                  |
 |            | Loopback10             | 10.0.3.10/32      |             |             |                   |                        |                  |
-|            | ***Vlan12***           | 192.168.12.254/24 |             |             | 192.168.12.12/24  | ***Vlan12***           | NODE-12-12       |
+|            | Vxlan1                 | Loopback10        |             |             |                   |                        |                  |
+|            | ***Vlan12***           | **Virtual IP**    |             |             | 192.168.12.12/24  | ***Vlan12***           | NODE-12-12       |
 |            | ***Port-Channel12***   |                   |             |             |                   | ***Port-Channel12***   | NODE-12-12       |
 |            | ***Ethernet12***       |                   |             |             |                   | ***ether1***           | NODE-12-12       |
 |            |                        |                   |             |             |                   |                        |                  |
@@ -58,6 +61,7 @@
 |            | Ethernet5              | 10.255.255.102/30 | HeartBeat   | HeartBeat   | 10.255.255.101/30 | Ethernet5              | LEAF-3-1         |
 |            | Loopback1              | 10.0.3.2/32       |             |             |                   |                        |                  |
 |            | Loopback10             | 10.0.3.10/32      |             |             |                   |                        |                  |
+|            | Vxlan1                 | Loopback10        |             |             |                   |                        |                  |
 |            | ***Vlan12***           | **Virtual IP**    |             |             | 192.168.12.12/24  | ***Vlan12***           | NODE-12-12       |
 |            | ***Port-Channel12***   |                   |             |             |                   | ***Port-Channel12***   | NODE-12-12       |
 |            | ***Ethernet12***       |                   |             |             |                   | ***ether2***           | NODE-12-12       |
