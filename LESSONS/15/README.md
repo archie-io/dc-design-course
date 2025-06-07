@@ -12,6 +12,87 @@
 
 ![](images/1-15.drawio.png)
 
+
+| HOSTNAME   | LOCAL INTF             | LOCAL IP          | LOCAL AS    | REMOTE AS   | REMOTE IP         | REMOTE INTF            | NEIGHBOR         |
+| ---------- | ---------------------- | ----------------- | ----------- | ----------- | ----------------- | ---------------------- | ---------------- |
+| SPINE-1    | Ethernet1              | 10.1.1.10/31      | 65000       | 65001       | 10.1.1.11/31      | Ethernet1              | LEAF-1           |
+|            | Ethernet2              | 10.1.2.10/31      | 65000       | 65002       | 10.1.2.11/31      | Ethernet1              | LEAF-2           |
+|            | Ethernet3              | 10.1.3.10/31      | 65000       | 65003       | 10.1.3.11/31      | Ethernet1              | LEAF-3-1         |
+|            | Ethernet4              | 10.1.3.20/31      | 65000       | 65003       | 10.1.3.21/31      | Ethernet1              | LEAF-3-2         |
+|            | Loopback1              | 10.0.0.1/32       |             |             |                   |                        |                  |
+|            |                        |                   |             |             |                   |                        |                  |
+| SPINE-2    | Ethernet1              | 10.2.1.10/31      | 65000       | 65001       | 10.2.1.11/31      | Ethernet2              | LEAF-1           |
+|            | Ethernet2              | 10.2.2.10/31      | 65000       | 65002       | 10.2.2.11/31      | Ethernet2              | LEAF-2           |
+|            | Ethernet3              | 10.2.3.10/31      | 65000       | 65003       | 10.2.3.11/31      | Ethernet2              | LEAF-3-1         |
+|            | Ethernet4              | 10.2.3.20/31      | 65000       | 65003       | 10.2.3.21/31      | Ethernet2              | LEAF-3-2         |
+|            | Loopback1              | 10.0.0.2/32       |             |             |                   |                        |                  |
+|            |                        |                   |             |             |                   |                        |                  |
+| LEAF-1     | Ethernet1              | 10.1.1.11/31      | 65001       | 65000       | 10.1.1.10/31      | Ethernet1              | SPINE-1          |
+|            | Ethernet2              | 10.2.1.11/31      | 65001       | 65000       | 10.2.1.10/31      | Ethernet1              | SPINE-2          |
+|            | Loopback1              | 10.0.1.1/32       |             |             |                   |                        |                  |
+|            | Vxlan1                 | Loopback1         |             |             |                   |                        |                  |
+|            | Vlan11                 | **Virtual IP**    |             |             | 192.168.11.11/24  | Ethernet0              | NODE-11-11       |
+|            |                        |                   |             |             |                   |                        |                  |
+| LEAF-2     | Ethernet1              | 10.1.2.11/31      | 65002       | 65000       | 10.1.2.10/31      | Ethernet2              | SPINE-1          |
+|            | Ethernet2              | 10.2.2.11/31      | 65002       | 65000       | 10.2.2.10/31      | Ethernet2              | SPINE-2          |
+|            | Loopback1              | 10.0.2.1/32       |             |             |                   |                        |                  |
+|            | Vxlan1                 | Loopback1         |             |             |                   |                        |                  |
+|            | Vlan11                 | **Virtual IP**    |             |             | 192.168.11.12/24  | Ethernet0              | NODE-11-12       |
+|            | Vlan12                 | **Virtual IP**    |             |             | 192.168.12.11/24  | Ethernet0              | NODE-12-11       |
+|            |                        |                   |             |             |                   |                        |                  |
+| LEAF-3-1   | Ethernet1              | 10.1.3.11/31      | 65003       | 65000       | 10.1.3.10/31      | Ethernet3              | SPINE-1          |
+|            | Ethernet2              | 10.2.3.11/31      | 65003       | 65000       | 10.2.3.10/31      | Ethernet3              | SPINE-2          |
+|            | ***Vlan4094***         | 10.255.255.1/30   | PeerLink-IP | PeerLink-IP | 10.255.255.2/30   | ***Vlan4094***         | LEAF-3-2         |
+|            | ***Vlan4090***         | 10.255.255.201/30 | iBGP        | iBGP        | 10.255.255.202/30 | ***Vlan4090***         | LEAF-3-2         |
+|            | ***Port-Channel4094*** |                   | PeerLink    | PeerLink    |                   | ***Port-Channel4094*** | LEAF-3-2         |
+|            | Ethernet5              | 10.255.255.101/30 | HeartBeat   | HeartBeat   | 10.255.255.102/30 | Ethernet5              | LEAF-3-2         |
+|            | Loopback1              | 10.0.3.1/32       |             |             |                   |                        |                  |
+|            | Loopback10             | 10.0.3.10/32      |             |             |                   |                        |                  |
+|            | Vxlan1                 | Loopback10        |             |             |                   |                        |                  |
+|            | ***Vlan12***           | **Virtual IP**    |             |             | 192.168.12.12/24  | ***Vlan12***           | NODE-12-12       |
+|            | ***Port-Channel12***   |                   |             |             |                   | ***Port-Channel12***   | NODE-12-12       |
+|            | ***Ethernet12***       |                   |             |             |                   | ***ether1***           | NODE-12-12       |
+|            | **Vlan2001**           | 172.16.1.1/24     | 65003       | 67000       | 172.16.1.3/24     | Port-Channel6.2001     | InterVxLANRouter |
+|            | **Vlan2002**           | 172.16.2.1/24     | 65003       | 67000       | 172.16.2.3/24     | Port-Channel6.2002     | InterVxLANRouter |
+|            | **Port-Channel6**      |                   |             |             |                   | Port-Channel6          | InterVxLANRouter |
+|            | **Ethernet6**          |                   |             |             |                   | Ethernet1              | InterVxLANRouter |
+|            | **PEthernet6**         |                   |             |             |                   | Ethernet2              | InterVxLANRouter |
+|            |                        |                   |             |             |                   |                        |                  |
+| LEAF-3-2   | Ethernet1              | 10.1.3.21/31      | 65003       | 65000       | 10.1.3.20/31      | Ethernet4              | SPINE-1          |
+|            | Ethernet2              | 10.2.3.21/31      | 65003       | 65000       | 10.2.3.20/31      | Ethernet4              | SPINE-2          |
+|            | ***Vlan4094***         | 10.255.255.2/30   | PeerLink-IP | PeerLink-IP | 10.255.255.1/30   | ***Vlan4094***         | LEAF-3-1         |
+|            | ***Vlan4090***         | 10.255.255.202/30 | iBGP        | iBGP        | 10.255.255.201/30 | ***Vlan4090***         | LEAF-3-1         |
+|            | ***Port-Channel4094*** |                   | PeerLink    | PeerLink    |                   | ***Port-Channel4094*** | LEAF-3-1         |
+|            | Ethernet5              | 10.255.255.102/30 | HeartBeat   | HeartBeat   | 10.255.255.101/30 | Ethernet5              | LEAF-3-1         |
+|            | Loopback1              | 10.0.3.2/32       |             |             |                   |                        |                  |
+|            | Loopback10             | 10.0.3.10/32      |             |             |                   |                        |                  |
+|            | Vxlan1                 | Loopback10        |             |             |                   |                        |                  |
+|            | ***Vlan12***           | **Virtual IP**    |             |             | 192.168.12.12/24  | ***Vlan12***           | NODE-12-12       |
+|            | ***Port-Channel12***   |                   |             |             |                   | ***Port-Channel12***   | NODE-12-12       |
+|            | ***Ethernet12***       |                   |             |             |                   | ***ether2***           | NODE-12-12       |
+|            | **Vlan2001**           | 172.16.1.2/24     | 65003       | 67000       | 172.16.1.3/24     | Port-Channel6.2001     | InterVxLANRouter |
+|            | **Vlan2002**           | 172.16.2.2/24     | 65003       | 67000       | 172.16.2.3/24     | Port-Channel6.2002     | InterVxLANRouter |
+|            | **Port-Channel6**      |                   |             |             |                   | Port-Channel6          | InterVxLANRouter |
+|            | **PEthernet6**         |                   |             |             |                   | Ethernet1              | InterVxLANRouter |
+|            | **Ethernet6**          |                   |             |             |                   | Ethernet2              | InterVxLANRouter |
+|            |                        |                   |             |             |                   |                        |                  |
+| NODE-11-11 | Ethernet0              | 192.168.11.11/24  |             |             | **Virtual IP**    | Vlan11                 | LEAF-1           |
+|            |                        |                   |             |             |                   |                        |                  |
+| NODE-11-12 | Ethernet0              | 192.168.11.12/24  |             |             | **Virtual IP**    | Vlan11                 | LEAF-2           |
+|            |                        |                   |             |             |                   |                        |                  |
+| NODE-12-11 | Ethernet0              | 192.168.12.11/24  |             |             | **Virtual IP**    | Vlan12                 | LEAF-2           |
+|            |                        |                   |             |             |                   |                        |                  |
+| NODE-12-12 | ***Vlan12***           | 192.168.12.12/24  |             |             | **Virtual IP**    | ***Vlan12***           | LEAF-3-1/LEAF3-2 |
+|            | ***Port-Channel12***   |                   |             |             |                   | ***Port-Channel12***   | LEAF-3-1/LEAF3-2 |
+|            | ***ether1***           |                   |             |             |                   | ***Ethernet12***       | LEAF-3-1         |
+|            | ***ether2***           |                   |             |             |                   | ***Ethernet12***       | LEAF-3-2         |
+
+|            | **Virtual IP**    |
+| ---------- | ----------------- |
+| **Vlan11** | 192.168.11.254/24 |
+| **Vlan12** | 192.168.11.254/24 |
+
+
 ### Конфигурация оборудования
 
 - #### [LEAF-1](config/LEAF-1.cfg)
